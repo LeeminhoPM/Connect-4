@@ -1,10 +1,10 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import AppLayout from "./ui/AppLayout";
-import Game from "./pages/Game";
-import Home from "./pages/Home";
-import Rank from "./pages/Rank";
+import { useEffect, useState } from "react";
+import { Bot, House, Pause, Users, X } from "lucide-react";
 
-const App = () => {
+const ROW_COUNT = 6;
+const COLUMN_COUNT = 7;
+
+function Game() {
     const [board, setBoard] = useState(
         Array.from({ length: ROW_COUNT }, () =>
             Array.from({ length: COLUMN_COUNT }, () => 0),
@@ -13,17 +13,23 @@ const App = () => {
     const [turn, setTurn] = useState(0);
     const [pause, setPause] = useState(false);
     const [gameOver, setGameOver] = useState(false);
-    const [hoverTile, setHoverTile] = useState(null);
 
-    const handleMouseEnter = (y) => {
+    const handleMouseEnter = (e) => {
+        e.preventDefault();
         if (!gameOver) {
+            let [x, y] = e.target.id.split("_");
             y = parseInt(y);
 
             if (board[0][y] === 0) {
                 for (let i = ROW_COUNT - 1; i >= 0; i--) {
                     for (let j = 0; j < COLUMN_COUNT; j++) {
                         if (j === y && board[i][j] === 0) {
-                            setHoverTile({ x: i, y: j });
+                            const element = document.getElementById(
+                                `${i}_${j}`,
+                            );
+                            element.classList.add(
+                                `${turn % 2 === 0 ? "bg-red-300" : "bg-yellow-300"}`,
+                            );
                             return;
                         }
                     }
@@ -32,16 +38,22 @@ const App = () => {
         }
     };
 
-    const handleMouseLeave = (y) => {
+    const handleMouseLeave = (e) => {
+        e.preventDefault();
         if (!gameOver) {
+            let [x, y] = e.target.id.split("_");
             y = parseInt(y);
 
             if (board[0][y] === 0) {
                 for (let i = ROW_COUNT - 1; i >= 0; i--) {
                     for (let j = 0; j < COLUMN_COUNT; j++) {
                         if (j === y && board[i][j] === 0) {
-                            setHoverTile(null);
-                            return;
+                            const element = document.getElementById(
+                                `${i}_${j}`,
+                            );
+                            element.classList.remove(
+                                `${turn % 2 === 0 ? "bg-red-300" : "bg-yellow-300"}`,
+                            );
                         }
                     }
                 }
@@ -49,8 +61,10 @@ const App = () => {
         }
     };
 
-    const handleMove = (y) => {
+    const handleMove = (e) => {
+        e.preventDefault();
         if (!gameOver) {
+            let [x, y] = e.target.id.split("_");
             y = parseInt(y);
 
             if (board[0][y] === 0) {
@@ -64,10 +78,6 @@ const App = () => {
                                     ? (newBoard[i][j] = 1)
                                     : (newBoard[i][j] = 2);
                                 checkWinMove(newBoard);
-                                setHoverTile({
-                                    x: i - 1 < 0 ? 0 : i - 1,
-                                    y: j,
-                                });
                                 return newBoard;
                             }
                         }
@@ -200,12 +210,12 @@ const App = () => {
                     row.map((col, j) => {
                         return (
                             <div
-                                onClick={() => handleMove(j)}
-                                onMouseEnter={() => handleMouseEnter(j)}
-                                onMouseLeave={() => handleMouseLeave(j)}
+                                onClick={handleMove}
+                                onMouseEnter={handleMouseEnter}
+                                onMouseLeave={handleMouseLeave}
                                 key={`tile_${i}_${j}`}
                                 id={`${i}_${j}`}
-                                className={`border border-black rounded-full p-2 ${!gameOver && hoverTile && hoverTile.x === i && hoverTile.y === j ? (turn % 2 === 0 ? "bg-red-200" : "bg-yellow-200") : ""} ${board[i][j] !== 0 ? (board[i][j] === 1 ? "bg-red-500" : "bg-yellow-500") : ""}`}
+                                className={`border border-black rounded-full p-2 ${!gameOver ? "cursor-pointer" : ""} ${board[i][j] !== 0 ? (board[i][j] === 1 ? "bg-red-500" : "bg-yellow-500") : ""}`}
                             ></div>
                         );
                     }),
@@ -213,17 +223,5 @@ const App = () => {
             </div>
         </div>
     );
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/game" element={<Game />} />
-          <Route path="/rank" element={<Rank />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
-};
-
-export default App;
+}
+export default Game;
