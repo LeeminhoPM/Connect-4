@@ -14,10 +14,58 @@ const App = () => {
     const [pause, setPause] = useState(false);
     const [gameOver, setGameOver] = useState(false);
 
+    const handleMouseEnter = (e) => {
+        e.preventDefault();
+        if (!gameOver) {
+            let [x, y] = e.target.id.split("_");
+            y = parseInt(y);
+
+            if (board[0][y] === 0) {
+                for (let i = ROW_COUNT - 1; i >= 0; i--) {
+                    for (let j = 0; j < COLUMN_COUNT; j++) {
+                        if (j === y && board[i][j] === 0) {
+                            const element = document.getElementById(
+                                `${i}_${j}`,
+                            );
+                            element.classList.add(
+                                `${turn % 2 === 0 ? "bg-red-300" : "bg-yellow-300"}`,
+                            );
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    const handleMouseLeave = (e) => {
+        e.preventDefault();
+        if (!gameOver) {
+            let [x, y] = e.target.id.split("_");
+            y = parseInt(y);
+
+            if (board[0][y] === 0) {
+                for (let i = ROW_COUNT - 1; i >= 0; i--) {
+                    for (let j = 0; j < COLUMN_COUNT; j++) {
+                        if (j === y && board[i][j] === 0) {
+                            const element = document.getElementById(
+                                `${i}_${j}`,
+                            );
+                            element.classList.remove(
+                                `${turn % 2 === 0 ? "bg-red-300" : "bg-yellow-300"}`,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    };
+
     const handleMove = (e) => {
         e.preventDefault();
         if (!gameOver) {
-            const y = parseInt(e.target.id);
+            let [x, y] = e.target.id.split("_");
+            y = parseInt(y);
 
             if (board[0][y] === 0) {
                 setBoard((row) => {
@@ -163,9 +211,11 @@ const App = () => {
                         return (
                             <div
                                 onClick={handleMove}
+                                onMouseEnter={handleMouseEnter}
+                                onMouseLeave={handleMouseLeave}
                                 key={`tile_${i}_${j}`}
-                                id={`${j}`}
-                                className={`border border-black rounded-full p-2 ${board[i][j] !== 0 ? (board[i][j] === 1 ? "bg-red-500" : "bg-yellow-500") : ""}`}
+                                id={`${i}_${j}`}
+                                className={`border border-black rounded-full p-2 ${!gameOver ? "cursor-pointer" : ""} ${board[i][j] !== 0 ? (board[i][j] === 1 ? "bg-red-500" : "bg-yellow-500") : ""}`}
                             ></div>
                         );
                     }),
