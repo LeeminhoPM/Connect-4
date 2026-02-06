@@ -14,6 +14,7 @@ const App = () => {
     const [pause, setPause] = useState(false);
     const [gameOver, setGameOver] = useState(false);
     const [hoverTile, setHoverTile] = useState(null);
+    const [draw, setDraw] = useState(false);
 
     const handleMouseEnter = (y) => {
         if (!gameOver) {
@@ -138,6 +139,16 @@ const App = () => {
                 }
             }
         }
+
+        checkDrawMove(newBoard);
+    };
+
+    const checkDrawMove = (newBoard) => {
+        if (!newBoard[0].includes(0)) {
+            setDraw(true);
+            setPause(true);
+            setGameOver(true);
+        }
     };
 
     const handleNewGame = () => {
@@ -149,6 +160,18 @@ const App = () => {
         );
         setTurn(0);
         setPause(false);
+        setDraw(false);
+    };
+
+    const menuNotification = () => {
+        if (draw && gameOver) {
+            return "Hòa";
+        } else if (gameOver) {
+            return (turn - 1) % 2 === 0
+                ? "Người chơi 1 thắng"
+                : "Người chơi 2 thắng";
+        }
+        return "Tạm dừng";
     };
 
     useEffect(() => {
@@ -167,11 +190,7 @@ const App = () => {
                             <X />
                         </button>
                         <h5 className="text-center mb-5 p-2 font-semibold text-xl border-b border-b-gray-100">
-                            {gameOver
-                                ? (turn - 1) % 2 === 0
-                                    ? "Người chơi 1 thắng"
-                                    : "Người chơi 2 thắng"
-                                : "Tạm dừng"}
+                            {menuNotification()}
                         </h5>
                         <button className="p-5 m-4 bg-green-500 rounded-lg cursor-pointer hover:bg-green-400 transition-colors duration-200">
                             <House />
