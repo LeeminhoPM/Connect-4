@@ -3,7 +3,7 @@ import { Bot, House, Pause, Users, X } from "lucide-react";
 
 const ROW_COUNT = 6;
 const COLUMN_COUNT = 7;
-const MAX_DEPTH = 3;
+const MAX_DEPTH = 5;
 
 const App = () => {
     const [board, setBoard] = useState(
@@ -188,6 +188,7 @@ const App = () => {
                 bestMove = col;
             }
         }
+        console.log(bestMove);
         handleMove(bestMove, 2);
     };
 
@@ -303,7 +304,7 @@ const App = () => {
             const timer = setTimeout(() => {
                 handleAiMove();
                 setTurn((prev) => (prev + 1) % 2);
-            }, 300);
+            }, 100);
             return () => clearTimeout(timer);
         }
         return () => {};
