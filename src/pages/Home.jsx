@@ -14,11 +14,8 @@ export const Home = () => {
     return (
         <div className="w-screen h-screen bg-gray-700 text-white flex justify-center items-center">
             <div className="flex flex-col">
-                {/* <h1 className="text-9xl text-red-500">
-                    Connect <span className="text-yellow-500">4</span>
-                </h1> */}
                 <img src={logo} className="w-200" />
-                <div className="flex items-center justify-center my-6">
+                <div className="flex items-center justify-center mb-8">
                     <div className="mr-4">
                         <button
                             onClick={() => setGameMode(0)}
@@ -64,7 +61,7 @@ export const Home = () => {
                         </div>
                     </div>
                 )}
-                <div className="flex justify-center mt-10">
+                <div className="flex justify-center mt-8">
                     <button
                         onClick={() => navigate("/game")}
                         className="px-12 py-6 bg-green-500 rounded-lg text-2xl cursor-pointer shadow-2xl hover:bg-green-400 transition-colors duration-200"

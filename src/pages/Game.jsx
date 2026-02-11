@@ -312,6 +312,8 @@ export const Game = () => {
         setTurn(0);
         setPause(false);
         setDraw(false);
+        setIsThinking(false);
+        setWinningTile([]);
     };
 
     const menuNotification = () => {
