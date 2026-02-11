@@ -2,6 +2,7 @@ import { Bot, Users } from "lucide-react";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../contexts/AppContext";
+import logo from "../assets/logo.png";
 
 const DEPTH_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
 
@@ -13,10 +14,11 @@ export const Home = () => {
     return (
         <div className="w-screen h-screen bg-gray-700 text-white flex justify-center items-center">
             <div className="flex flex-col">
-                <h1 className="text-9xl text-red-500">
+                {/* <h1 className="text-9xl text-red-500">
                     Connect <span className="text-yellow-500">4</span>
-                </h1>
-                <div className="flex items-center justify-center my-10">
+                </h1> */}
+                <img src={logo} className="w-200" />
+                <div className="flex items-center justify-center my-6">
                     <div className="mr-4">
                         <button
                             onClick={() => setGameMode(0)}
