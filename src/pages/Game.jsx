@@ -20,7 +20,7 @@ export const Game = () => {
     const [draw, setDraw] = useState(false);
     const [isThinking, setIsThinking] = useState(false);
 
-    const { gameMode, maxDepth } = useContext(AppContext);
+    const { gameMode, maxDepth, playerPiece } = useContext(AppContext);
 
     const navigate = useNavigate();
 
@@ -30,28 +30,9 @@ export const Game = () => {
 
             if (board[0][y] === 0) {
                 for (let i = ROW_COUNT - 1; i >= 0; i--) {
-                    for (let j = 0; j < COLUMN_COUNT; j++) {
-                        if (j === y && board[i][j] === 0) {
-                            setHoverTile({ x: i, y: j });
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    };
-
-    const handleMouseLeave = (y) => {
-        if (!gameOver) {
-            y = parseInt(y);
-
-            if (board[0][y] === 0) {
-                for (let i = ROW_COUNT - 1; i >= 0; i--) {
-                    for (let j = 0; j < COLUMN_COUNT; j++) {
-                        if (j === y && board[i][j] === 0) {
-                            setHoverTile(null);
-                            return;
-                        }
+                    if (board[i][y] === 0) {
+                        setHoverTile({ x: i, y });
+                        return;
                     }
                 }
             }
@@ -79,7 +60,19 @@ export const Game = () => {
                     }
                     return prev;
                 });
+                setTurn((prev) => (prev + 1) % 2);
+                return true;
+            } else {
+                return false;
             }
+        }
+    };
+
+    const handlePlayerMove = (y) => {
+        if (gameMode === 0) {
+            handleMove(y, turn === 0 ? 1 : 2);
+        } else if (!isThinking && gameMode === 1) {
+            handleMove(y, playerPiece) && setIsThinking(true);
         }
     };
 
@@ -209,7 +202,11 @@ export const Game = () => {
         const checkBoard = board.map((row) => [...row]);
 
         for (let col of possibleMoves(checkBoard)) {
-            const newBoard = dropPiece(checkBoard, col, 2);
+            const newBoard = dropPiece(
+                checkBoard,
+                col,
+                playerPiece === 1 ? 2 : 1,
+            );
             const score = minimax(false, 0, -Infinity, Infinity, newBoard);
 
             if (score >= bestScore) {
@@ -217,7 +214,7 @@ export const Game = () => {
                 bestMove = col;
             }
         }
-        handleMove(bestMove, 2);
+        handleMove(bestMove, playerPiece === 1 ? 2 : 1);
     };
 
     const possibleMoves = (checkBoard) => {
@@ -236,7 +233,7 @@ export const Game = () => {
         } else if (checkDrawMove(predictBoard, false)) {
             return 0;
         } else if (depth === maxDepth) {
-            return scoreEvaluation(predictBoard, 2);
+            return scoreEvaluation(predictBoard, playerPiece === 1 ? 2 : 1);
         }
 
         if (maximizing) {
@@ -247,7 +244,7 @@ export const Game = () => {
                     depth + 1,
                     alpha,
                     beta,
-                    dropPiece(predictBoard, col, 2),
+                    dropPiece(predictBoard, col, playerPiece === 1 ? 2 : 1),
                 );
                 maxEval = Math.max(maxEval, score);
 
@@ -265,7 +262,7 @@ export const Game = () => {
                     depth + 1,
                     alpha,
                     beta,
-                    dropPiece(predictBoard, col, 1),
+                    dropPiece(predictBoard, col, playerPiece),
                 );
                 minEval = Math.min(minEval, score);
 
@@ -320,7 +317,9 @@ export const Game = () => {
         if (draw && gameOver) {
             return "Hòa";
         } else if (gameOver && gameMode === 1) {
-            return (turn + 1) % 2 === 0 ? "Người chơi thắng" : "AI thắng";
+            return (turn + 1) % 2 === playerPiece - 1
+                ? "Người chơi thắng"
+                : "AI thắng";
         } else if (gameOver) {
             return (turn + 1) % 2 === 0
                 ? "Người chơi 1 thắng"
@@ -330,10 +329,13 @@ export const Game = () => {
     };
 
     useEffect(() => {
-        if (gameMode === 1 && !gameOver && turn % 2 === 1) {
+        if (
+            gameMode === 1 &&
+            !gameOver &&
+            turn === (playerPiece === 1 ? 1 : 0)
+        ) {
             const timer = setTimeout(() => {
                 handleAiMove();
-                setTurn((prev) => (prev + 1) % 2);
                 setIsThinking(false);
             }, 100);
             return () => clearTimeout(timer);
@@ -344,19 +346,19 @@ export const Game = () => {
         <div className="w-screen h-screen bg-gray-700 flex justify-center items-center relative">
             {pause ? (
                 <div className="absolute inset-0 backdrop-blur-sm flex items-center justify-center">
-                    <div className="absolute border border-gray-100 shadow-xl bg-white p-5 rounded-xl">
+                    <div className="absolute border border-white shadow-2xl bg-gray-700 p-5 rounded-xl">
                         <button
                             onClick={() => setPause(false)}
                             className="absolute top-0 right-0 translate-x-[50%] translate-y-[-50%] p-1 text-sm font-semibold bg-gray-300 rounded-full cursor-pointer"
                         >
                             <X />
                         </button>
-                        <h5 className="text-center mb-5 p-2 font-semibold text-xl border-b border-b-gray-100">
+                        <h5 className="text-center mb-5 p-2 font-semibold text-white text-xl border-b border-b-gray-100">
                             {menuNotification()}
                         </h5>
                         <button
                             onClick={() => navigate("/")}
-                            className="p-5 m-4 bg-green-500 rounded-lg cursor-pointer hover:bg-green-400 transition-colors duration-200"
+                            className="p-5 m-4 bg-green-500 rounded-lg cursor-pointer text-white hover:bg-green-400 transition-colors duration-200"
                         >
                             <House />
                         </button>
@@ -364,7 +366,7 @@ export const Game = () => {
                             onClick={() => {
                                 handleNewGame();
                             }}
-                            className="p-5 m-4 bg-green-500 rounded-lg cursor-pointer hover:bg-green-400 transition-colors duration-200"
+                            className="p-5 m-4 bg-green-500 rounded-lg cursor-pointer text-white hover:bg-green-400 transition-colors duration-200"
                         >
                             <RotateCcw />
                         </button>
@@ -378,20 +380,24 @@ export const Game = () => {
                     <Pause size={30} />
                 </button>
             )}
-            <div className="h-175 w-200 bg-gray-900 shadow-2xl grid grid-cols-7 rounded-[48px]">
+            <div className="text-white p-6">
+                <p className="w-full text-center mb-6 text-3xl font-medium">
+                    {gameMode === 0
+                        ? "Người chơi 1"
+                        : playerPiece === 1
+                          ? "Người chơi"
+                          : "Level " + maxDepth}
+                </p>
+                <div className={`w-40 h-40 rounded-full bg-red-500`}></div>
+            </div>
+            <div className="h-175 w-200 mx-20 bg-gray-900 shadow-2xl grid grid-cols-7 rounded-[48px]">
                 {board.map((row, i) =>
                     row.map((col, j) => {
                         return (
                             <div
-                                onClick={() => {
-                                    if (!isThinking) {
-                                        handleMove(j, turn === 0 ? 1 : 2);
-                                        setTurn((prev) => (prev + 1) % 2);
-                                        gameMode === 1 && setIsThinking(true);
-                                    }
-                                }}
+                                onClick={() => handlePlayerMove(j)}
                                 onMouseEnter={() => handleMouseEnter(j)}
-                                onMouseLeave={() => handleMouseLeave(j)}
+                                onMouseLeave={() => setHoverTile(null)}
                                 key={`tile_${i}_${j}`}
                                 id={`${i}_${j}`}
                                 className={`w-full h-full p-2 ${winningTile.some((tile) => tile.x === i && tile.y === j) ? ((turn + 1) % 2 === 0 ? "bg-red-400" : "bg-yellow-400") : ""}`}
@@ -403,6 +409,16 @@ export const Game = () => {
                         );
                     }),
                 )}
+            </div>
+            <div className="text-white p-6">
+                <p className="w-full text-center mb-6 text-3xl font-medium">
+                    {gameMode === 0
+                        ? "Người chơi 2"
+                        : playerPiece === 2
+                          ? "Người chơi"
+                          : "Level " + maxDepth}
+                </p>
+                <div className={`w-40 h-40 rounded-full bg-yellow-500`}></div>
             </div>
         </div>
     );
