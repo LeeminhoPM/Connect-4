@@ -19,6 +19,7 @@ export const Game = () => {
     const [winningTile, setWinningTile] = useState([]);
     const [draw, setDraw] = useState(false);
     const [isThinking, setIsThinking] = useState(false);
+    const [moveOrder, setMoveOrder] = useState([]);
 
     const { gameMode, maxDepth, playerPiece } = useContext(AppContext);
 
@@ -43,9 +44,9 @@ export const Game = () => {
         if (!gameOver) {
             y = parseInt(y);
             if (board[0][y] === 0) {
+                let x = undefined;
                 setBoard((prev) => {
                     const newBoard = prev.map((col) => [...col]);
-
                     for (let i = ROW_COUNT - 1; i >= 0; i--) {
                         if (prev[i][y] === 0) {
                             newBoard[i][y] = player;
@@ -55,16 +56,41 @@ export const Game = () => {
                                 x: Math.max(0, i - 1),
                                 y,
                             });
+                            x = i;
                             return newBoard;
                         }
                     }
                     return prev;
                 });
+                setMoveOrder((prev) => [{ x, y }, ...prev]);
                 setTurn((prev) => (prev + 1) % 2);
                 return true;
             } else {
                 return false;
             }
+        }
+    };
+
+    const handleUndoMove = () => {
+        if (gameMode === 0) {
+            setBoard((prev) => {
+                const newBoard = prev.map((col) => [...col]);
+                newBoard[moveOrder[0].x][moveOrder[0].y] = 0;
+                return newBoard;
+            });
+            setTurn((prev) => (prev + 1) % 2);
+            setMoveOrder((prev) => prev.filter((value, index) => index !== 0));
+        } else if (gameMode === 1) {
+            setBoard((prev) => {
+                const newBoard = prev.map((col) => [...col]);
+                newBoard[moveOrder[0].x][moveOrder[0].y] = 0;
+                newBoard[moveOrder[1].x][moveOrder[1].y] = 0;
+                return newBoard;
+            });
+            setTurn(playerPiece === 1 ? 0 : 1);
+            setMoveOrder((prev) =>
+                prev.filter((value, index) => index !== 0 && index !== 1),
+            );
         }
     };
 
@@ -311,6 +337,7 @@ export const Game = () => {
         setDraw(false);
         setIsThinking(false);
         setWinningTile([]);
+        setMoveOrder([]);
     };
 
     const menuNotification = () => {
@@ -373,12 +400,25 @@ export const Game = () => {
                     </div>
                 </div>
             ) : (
-                <button
-                    onClick={() => setPause((prev) => !prev)}
-                    className="absolute top-2 right-2 text-white cursor-pointer rounded-full border-4 border-white p-2"
-                >
-                    <Pause size={30} />
-                </button>
+                <>
+                    <button
+                        onClick={() => setPause((prev) => !prev)}
+                        className="absolute top-2 right-2 text-white cursor-pointer p-2 rounded-full hover:bg-gray-600 transition-all duration-200"
+                    >
+                        <Pause size={40} />
+                    </button>
+                    <button
+                        disabled={
+                            (gameMode === 1 && moveOrder.length <= 1) ||
+                            moveOrder.length === 0 ||
+                            gameOver
+                        }
+                        onClick={handleUndoMove}
+                        className="absolute top-2 left-2 text-white cursor-pointer p-2 rounded-full hover:bg-gray-600 transition-all duration-200"
+                    >
+                        <RotateCcw size={40} />
+                    </button>
+                </>
             )}
             <div className="text-white p-6">
                 <p className="w-full text-center mb-6 text-3xl font-medium">
