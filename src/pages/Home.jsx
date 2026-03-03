@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from "../contexts/AppContext";
 import logo from "../assets/logo.png";
 
-const DEPTH_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
+const DEPTH_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export const Home = () => {
     const {
