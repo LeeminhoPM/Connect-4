@@ -52,10 +52,11 @@ export const Game = () => {
                             newBoard[i][y] = player;
                             checkWinMove(newBoard, true) ||
                                 checkDrawMove(newBoard, true);
-                            setHoverTile({
-                                x: Math.max(0, i - 1),
-                                y,
-                            });
+                            if (i > 0) {
+                                setHoverTile({ x: i - 1, y });
+                            } else {
+                                setHoverTile(null);
+                            }
                             x = i;
                             return newBoard;
                         }
@@ -443,7 +444,7 @@ export const Game = () => {
                                 className={`w-full h-full p-2 ${winningTile.some((tile) => tile.x === i && tile.y === j) ? ((turn + 1) % 2 === 0 ? "bg-red-400" : "bg-yellow-400") : ""}`}
                             >
                                 <div
-                                    className={`border border-gray-800 rounded-full w-full h-full ${!gameOver && !isThinking && hoverTile && hoverTile.x === i && hoverTile.y === j ? (turn % 2 === 0 ? "bg-red-300" : "bg-yellow-300") : "bg-gray-700"} ${board[i][j] !== 0 ? (board[i][j] === 1 ? "bg-red-500" : "bg-yellow-500") : ""}`}
+                                    className={`border border-gray-800 rounded-full w-full h-full ${!gameOver && !isThinking && hoverTile && hoverTile.x === i && hoverTile.y === j ? (turn % 2 === 0 ? "bg-red-300" : "bg-yellow-200") : "bg-gray-700"} ${board[i][j] !== 0 ? (board[i][j] === 1 ? "bg-red-500" : "bg-yellow-500") : ""}`}
                                 ></div>
                             </div>
                         );
