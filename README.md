@@ -1,16 +1,125 @@
-# React + Vite
+# Connect4 React
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🚀 Hướng dẫn khởi chạy dự án
 
-Currently, two official plugins are available:
+Dự án này sử dụng React và Vite.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### ⚙️ Yêu cầu môi trường
 
-## React Compiler
+- Node.js: phiên bản khuyến nghị **v18.x** hoặc **v20.x**
+- npm hoặc yarn
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+> Kiểm tra phiên bản Node.js:
+>
+> ```bash
+> node --version
+> ```
 
-## Expanding the ESLint configuration
+### 📦 Các bước cài đặt
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Clone repository về máy:
+
+```bash
+git clone https://github.com/LeeminhoPM/Connect-4.git
+```
+
+2. Chuyển vào thư mục dự án:
+
+```bash
+cd connect4
+```
+
+3. Cài đặt dependencies:
+
+Với npm:
+
+```bash
+npm install
+```
+
+Hoặc với yarn:
+
+```bash
+yarn install
+```
+
+### ▶️ Chạy project
+
+Khởi động dev server:
+
+```bash
+npm run dev
+```
+
+Hoặc với yarn:
+
+```bash
+yarn dev
+```
+
+Sau khi chạy, mở trình duyệt và truy cập:
+
+```text
+http://localhost:5173
+```
+
+### 🏗️ Build project
+
+Tạo bản build cho production:
+
+```bash
+npm run build
+```
+
+Hoặc với yarn:
+
+```bash
+yarn build
+```
+
+Thư mục output sau khi build:
+
+- `dist`
+
+### 🔍 Preview build
+
+Để xem trước bản build:
+
+```bash
+npm run preview
+```
+
+Hoặc với yarn:
+
+```bash
+yarn preview
+```
+
+Mở trình duyệt ở địa chỉ được hiển thị sau khi chạy lệnh.
+
+### ⚠️ Lưu ý
+
+- Nếu port bị trùng: đóng ứng dụng đang dùng port đó, hoặc chỉ định port khác bằng cách thêm `--port`:
+
+```bash
+npm run dev -- --port 5174
+```
+
+- Nếu gặp lỗi thiếu `node_modules`:
+    - Chạy lại `npm install` hoặc `yarn install`
+
+- Nếu gặp lỗi Node.js version không tương thích:
+    - Cập nhật Node.js lên phiên bản khuyến nghị
+
+- Nếu gặp lỗi khi chạy `npm run dev` hoặc build:
+    - Kiểm tra thông báo lỗi trong terminal
+    - Đảm bảo đã cài đủ dependencies
+
+---
+
+## 📌 Tổng kết
+
+- `npm install` hoặc `yarn install` để cài dependencies
+- `npm run dev` hoặc `yarn dev` để chạy dev server
+- `npm run build` hoặc `yarn build` để build
+- `npm run preview` hoặc `yarn preview` để xem trước build
