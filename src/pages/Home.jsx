@@ -1,308 +1,243 @@
-import { Bot, CircleQuestionMark, Users, X } from "lucide-react";
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Users, Bot, Play, HelpCircle, Trophy, Volume2, VolumeX, Sparkles, Flame } from "lucide-react";
 import { AppContext } from "../contexts/AppContext";
+import { DIFFICULTY_LEVELS } from "../constants/gameConstants";
 import logo from "../assets/logo.png";
-import step1 from "../assets/step1.jpg";
-import step2 from "../assets/step2.jpg";
-import step3 from "../assets/step3.jpg";
-import hint1 from "../assets/hint1.jpg";
-import hint2 from "../assets/hint2.jpg";
-
-const DEPTH_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8];
+import { HowToPlayModal } from "../components/HowToPlayModal";
+import { playSound } from "../utils/soundEffects";
 
 export const Home = () => {
     const {
         gameMode,
         setGameMode,
-        maxDepth,
-        setMaxDepth,
+        aiDifficulty,
+        setAiDifficulty,
         playerPiece,
         setPlayerPiece,
+        soundEnabled,
+        toggleSound,
+        scores,
     } = useContext(AppContext);
 
-    const [howToPlay, setHowToPlay] = useState(false);
-
+    const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
     const navigate = useNavigate();
 
+    const handleStartGame = () => {
+        playSound("click", soundEnabled);
+        navigate("/game");
+    };
+
+    // Calculate AI stats
+    const totalAiGames = scores.p1 + scores.ai;
+    const aiWinRate = totalAiGames > 0 ? Math.round((scores.p1 / totalAiGames) * 100) : 0;
+
     return (
-        <div className="w-screen h-screen bg-gray-700 text-white flex justify-center items-center relative">
-            {howToPlay && (
-                <div className="absolute inset-0 backdrop-blur-2xl flex justify-center items-center transition-opacity duration-300">
-                    <div className="w-[70%] h-[90%] border border-white bg-gray-700 rounded-lg relative shadow-2xl">
+        <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 relative overflow-x-hidden selection:bg-rose-500 selection:text-white">
+            {/* Ambient Background Glows */}
+            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-10 left-10 w-72 h-72 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-10 right-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 w-full max-w-md flex flex-col items-center">
+                {/* Sound toggle & Guide shortcut in top right */}
+                <div className="w-full flex items-center justify-end gap-2 mb-2">
+                    <button
+                        onClick={toggleSound}
+                        title={soundEnabled ? "Tắt âm thanh" : "Bật âm thanh"}
+                        className="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-all cursor-pointer shadow-md active:scale-95"
+                    >
+                        {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                    </button>
+                    <button
+                        onClick={() => setIsHowToPlayOpen(true)}
+                        title="Xem luật chơi"
+                        className="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-all cursor-pointer shadow-md active:scale-95"
+                    >
+                        <HelpCircle size={18} />
+                    </button>
+                </div>
+
+                {/* Logo and Game Title */}
+                <div className="flex flex-col items-center mb-6">
+                    <img
+                        src={logo}
+                        alt="Connect 4 Logo"
+                        className="w-48 sm:w-60 h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)] transform hover:scale-105 transition-transform duration-300"
+                    />
+                    <p className="text-xs sm:text-sm font-semibold tracking-widest text-cyan-400 uppercase mt-2">
+                        Kinh Điển • Chiến Thuật • Đỉnh Cao
+                    </p>
+                </div>
+
+                {/* Game Mode Selection */}
+                <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl mb-4 backdrop-blur-sm">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">
+                        Chọn chế độ chơi
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        {/* 2 Players */}
                         <button
-                            className="absolute top-0 right-0 translate-x-[50%] translate-y-[-50%] p-1 rounded-full bg-gray-200 text-gray-800 cursor-pointer z-10"
-                            onClick={() => setHowToPlay(false)}
+                            onClick={() => {
+                                playSound("click", soundEnabled);
+                                setGameMode(0);
+                            }}
+                            className={`p-3.5 rounded-xl flex flex-col items-center justify-center gap-2 border transition-all cursor-pointer active:scale-95 ${
+                                gameMode === 0
+                                    ? "bg-gradient-to-b from-emerald-600/30 to-emerald-950/40 border-emerald-500 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
+                                    : "bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                            }`}
                         >
-                            <X size={30} />
+                            <Users size={28} />
+                            <div className="text-center">
+                                <div className="text-sm font-bold">2 Người chơi</div>
+                                <div className="text-[10px] text-slate-400">Trên cùng thiết bị</div>
+                            </div>
                         </button>
-                        <div className="p-6 grid gap-y-12 h-full overflow-y-scroll overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-700">
-                            <h3 className="w-full text-center font-bold text-2xl border-b border-white pb-4">
-                                Luật chơi
-                            </h3>
 
-                            <div className="grid grid-cols-2 gap-x-6">
-                                <img
-                                    src={step1}
-                                    alt=""
-                                    className="rounded-lg"
-                                />
-                                <div className="text-justify">
-                                    <div className="float-left px-3 text-5xl font-bold text-center">
-                                        1
-                                    </div>
-                                    <b>Hiểu mục tiêu của trò chơi.</b> Trước khi
-                                    bạn có thể bắt đầu chơi Connect Four hoặc
-                                    lên kế hoạch chiến lược, bạn phải đảm bảo
-                                    rằng mình hiểu mục tiêu của trò chơi. Để
-                                    chiến thắng, một người chơi phải xếp được
-                                    bốn quân cờ cùng màu thành một hàng. Ai làm
-                                    được điều đó trước sẽ là người chiến thắng.
-                                    <ul className="pl-4 mt-4 space-y-2 list-disc">
-                                        <li>
-                                            Có ba cách để xếp bốn quân cờ liên
-                                            tiếp trong Connect Four: theo chiều
-                                            ngang (horizontal), theo chiều dọc
-                                            (vertical), theo đường chéo
-                                            (diagonal).
-                                        </li>
-                                        <li>
-                                            Một số phiên bản của Connect Four có
-                                            thêm một cách chơi khác, trong đó
-                                            bạn gắn thêm một cột vào bảng và cố
-                                            gắng xếp năm quân cờ liên tiếp.
-                                        </li>
-                                    </ul>
+                        {/* Vs AI */}
+                        <button
+                            onClick={() => {
+                                playSound("click", soundEnabled);
+                                setGameMode(1);
+                            }}
+                            className={`p-3.5 rounded-xl flex flex-col items-center justify-center gap-2 border transition-all cursor-pointer active:scale-95 ${
+                                gameMode === 1
+                                    ? "bg-gradient-to-b from-cyan-600/30 to-cyan-950/40 border-cyan-500 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)]"
+                                    : "bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                            }`}
+                        >
+                            <Bot size={28} />
+                            <div className="text-center">
+                                <div className="text-sm font-bold">Đấu với AI</div>
+                                <div className="text-[10px] text-slate-400">Minimax thông minh</div>
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* AI Configuration (When gameMode === 1) */}
+                    {gameMode === 1 && (
+                        <div className="mt-4 pt-4 border-t border-slate-800/80 space-y-4 animate-in fade-in duration-200">
+                            {/* AI Difficulty Selector */}
+                            <div>
+                                <div className="text-[11px] font-semibold text-slate-300 mb-2 flex items-center justify-between">
+                                    <span>Độ khó AI:</span>
+                                    <span className="text-amber-400 font-bold">
+                                        {DIFFICULTY_LEVELS.find((d) => d.id === aiDifficulty)?.name} (
+                                        {DIFFICULTY_LEVELS.find((d) => d.id === aiDifficulty)?.stars})
+                                    </span>
                                 </div>
+                                <div className="grid grid-cols-4 gap-1.5">
+                                    {DIFFICULTY_LEVELS.map((diff) => (
+                                        <button
+                                            key={diff.id}
+                                            onClick={() => {
+                                                playSound("click", soundEnabled);
+                                                setAiDifficulty(diff.id);
+                                            }}
+                                            className={`py-2 px-1 rounded-lg text-xs font-bold border transition-all cursor-pointer active:scale-95 text-center ${
+                                                aiDifficulty === diff.id
+                                                    ? "bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm"
+                                                    : "bg-slate-800/60 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                                            }`}
+                                        >
+                                            {diff.name}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-[10px] text-slate-400 mt-1.5 italic text-center">
+                                    {DIFFICULTY_LEVELS.find((d) => d.id === aiDifficulty)?.desc}
+                                </p>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-x-6">
-                                <div className="text-justify">
-                                    <div className="float-left px-3 text-5xl font-bold text-center">
-                                        2
-                                    </div>
-                                    <b>Thực hiện một nước đi.</b> Khi đến lượt
-                                    bạn trong Connect Four, bạn lấy một quân cờ
-                                    và thả nó vào một khe ở phía trên của bảng.
-                                    Bảng tiêu chuẩn có bảy cột và sáu hàng để
-                                    lựa chọn. Ở nước đi đầu tiên, quân cờ của
-                                    bạn thường sẽ rơi xuống hàng dưới cùng,
-                                    nhưng bạn có thể chọn bất kỳ cột nào, tùy
-                                    thuộc vào chiến lược của mình.
-                                    <ul className="pl-4 mt-4 space-y-2 list-disc">
-                                        <li>
-                                            Bạn cần cân nhắc kỹ từng nước đi, vì
-                                            sau khi bạn đi, đối thủ sẽ đến lượt.
-                                            Họ không chỉ có cơ hội ngăn cản
-                                            chiến lược xếp bốn quân liên tiếp
-                                            của bạn, mà đôi khi nước đi của bạn
-                                            còn có thể vô tình giúp họ dễ dàng
-                                            tạo được bốn quân liên tiếp hơn.
-                                        </li>
-                                    </ul>
+                            {/* Turn Order Selection */}
+                            <div>
+                                <div className="text-[11px] font-semibold text-slate-300 mb-2">
+                                    Chọn phe và thứ tự đi:
                                 </div>
-                                <img
-                                    src={step2}
-                                    alt=""
-                                    className="rounded-lg"
-                                />
-                            </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={() => {
+                                            playSound("click", soundEnabled);
+                                            setPlayerPiece(1);
+                                        }}
+                                        className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 ${
+                                            playerPiece === 1
+                                                ? "bg-red-950/40 border-red-500 text-red-300 shadow-sm"
+                                                : "bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800"
+                                        }`}
+                                    >
+                                        <div className="w-5 h-5 rounded-full chip-3d-red shadow-sm" />
+                                        <div className="text-xs font-bold">Đi trước (Đỏ)</div>
+                                    </button>
 
-                            <div className="grid grid-cols-2 gap-x-6">
-                                <img
-                                    src={step3}
-                                    alt=""
-                                    className="rounded-lg"
-                                />
-                                <div className="text-justify">
-                                    <div className="float-left px-3 text-5xl font-bold text-center">
-                                        3
-                                    </div>
-                                    <b>Phản ứng với nước đi của đối thủ.</b> Sau
-                                    khi bạn thực hiện một nước đi với quân cờ
-                                    của mình, đối thủ sẽ có lượt đi. Khi lên kế
-                                    hoạch cho từng nước đi, hãy cố gắng tưởng
-                                    tượng đối thủ sẽ phản ứng như thế nào. Điều
-                                    đó giúp bạn phản ứng nhanh và quyết đoán
-                                    trước các nước đi của họ. Trước khi thả một
-                                    quân cờ vào bảng, hãy tự hỏi bạn sẽ làm gì
-                                    tiếp theo nếu đối thủ thực hiện chính nước
-                                    đi mà bạn sắp làm.
-                                    <ul className="pl-4 mt-4 space-y-2 list-disc">
-                                        <li>
-                                            Nếu bạn đi trước, đối thủ thường sẽ
-                                            phản ứng với các nước đi của bạn và
-                                            cố gắng chặn bạn không tạo được bốn
-                                            quân liên tiếp.
-                                        </li>
-                                        <li>
-                                            Nếu bạn đi sau, bạn thường sẽ ở thế
-                                            phòng thủ, cố gắng ngăn đối thủ xếp
-                                            được bốn quân cờ liên tiếp.
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <h3 className="w-full text-center font-bold text-2xl border-b border-white pb-4">
-                                Chiến thuật
-                            </h3>
-
-                            <div className="grid grid-cols-2 gap-x-6">
-                                <div className="text-justify">
-                                    <div className="float-left px-3 text-5xl font-bold text-center">
-                                        1
-                                    </div>
-                                    <b>Chọn cột ở giữa cho nước đi đầu tiên.</b>{" "}
-                                    Nếu bạn là người đi trước trong một ván
-                                    Connect Four, nước đi đầu tiên của bạn thực
-                                    sự có thể quyết định toàn bộ ván đấu. Khi
-                                    bắt đầu, nước đi tốt nhất là đặt quân của
-                                    bạn vào cột trung tâm. Bằng cách đặt quân ở
-                                    vị trí đó, bạn khiến đối thủ khó phản công
-                                    hơn, từ đó tăng cơ hội chiến thắng của bạn.
-                                    <ul className="pl-4 mt-4 space-y-2 list-disc">
-                                        <li>
-                                            Việc đặt quân đầu tiên ở cột giữa
-                                            không đảm bảo bạn sẽ thắng. Bạn vẫn
-                                            cần tránh mắc sai lầm trong suốt quá
-                                            trình chơi.
-                                        </li>
-                                        <li>
-                                            Nếu bạn chọn một cột khác ngoài cột
-                                            giữa cho nước đi đầu tiên, đối thủ
-                                            sẽ dễ dàng hơn trong việc buộc trận
-                                            đấu kết thúc với kết quả hòa.
-                                        </li>
-                                    </ul>
-                                </div>
-                                <img
-                                    src={hint1}
-                                    alt=""
-                                    className="rounded-lg"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-x-6">
-                                <img
-                                    src={hint2}
-                                    alt=""
-                                    className="rounded-lg"
-                                />
-                                <div className="text-justify">
-                                    <div className="float-left px-3 text-5xl font-bold text-center">
-                                        2
-                                    </div>
-                                    <b>
-                                        Chọn một ô khác ở hàng dưới cùng cho
-                                        nước đi thứ hai.
-                                    </b>{" "}
-                                    Khi bạn là người đi sau trong một ván
-                                    Connect Four, bạn ở thế phòng thủ nên việc
-                                    giành chiến thắng sẽ khó hơn. Nếu đối thủ
-                                    đặt quân vào cột giữa ngay từ đầu, đừng đặt
-                                    quân của bạn vào cùng cột đó (chồng lên trên
-                                    quân của họ), vì điều đó không mang lại lợi
-                                    thế chiến thuật nào. Thay vào đó, lựa chọn
-                                    tốt nhất là đặt quân của bạn ở hàng dưới
-                                    cùng trong một cột khác và chờ đối thủ mắc
-                                    sai lầm.
-                                    <ul className="pl-4 mt-4 space-y-2 list-disc">
-                                        <li>
-                                            Nếu đối thủ không đặt quân vào cột
-                                            giữa ở nước đi đầu tiên, thì khi đến
-                                            lượt bạn, hãy chọn cột giữa làm nước
-                                            đi đầu tiên của mình vì vị trí này
-                                            mang lại lợi thế tốt nhất trong trò
-                                            chơi.
-                                        </li>
-                                    </ul>
+                                    <button
+                                        onClick={() => {
+                                            playSound("click", soundEnabled);
+                                            setPlayerPiece(2);
+                                        }}
+                                        className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 ${
+                                            playerPiece === 2
+                                                ? "bg-amber-950/40 border-yellow-400 text-yellow-300 shadow-sm"
+                                                : "bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800"
+                                        }`}
+                                    >
+                                        <div className="w-5 h-5 rounded-full chip-3d-yellow shadow-sm" />
+                                        <div className="text-xs font-bold">Đi sau (Vàng)</div>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
-            )}
-            <div className="flex flex-col">
-                <img src={logo} className="w-150" />
-                <div className="flex items-center justify-center mb-8">
-                    <div className="mr-4">
-                        <button
-                            onClick={() => setGameMode(0)}
-                            className={`p-6 m-6 mb-4 bg-gray-500 rounded-lg cursor-pointer shadow-2xl transition-all duration-200 ${gameMode === 0 ? "bg-green-500" : "hover:bg-gray-400"}`}
-                        >
-                            <Users size={30} />
-                        </button>
-                        <p
-                            className={`w-full text-center font-semibold text-lg transition-all duration-200 ${gameMode === 0 ? "text-green-500" : "text-gray-500"}`}
-                        >
-                            Chơi với người
-                        </p>
-                    </div>
-                    <div className="ml-4">
-                        <button
-                            onClick={() => setGameMode(1)}
-                            className={`p-6 m-6 mb-4 bg-gray-500 rounded-lg cursor-pointer shadow-2xl transition-all duration-200 ${gameMode === 1 ? "bg-green-500" : "hover:bg-gray-400"}`}
-                        >
-                            <Bot size={30} />
-                        </button>
-                        <p
-                            className={`w-full text-center font-semibold text-lg transition-all duration-200 ${gameMode === 1 ? "text-green-500" : "text-gray-500"}`}
-                        >
-                            Chơi với máy
-                        </p>
-                    </div>
-                </div>
-                {gameMode === 1 && (
-                    <div className="bg-gray-900 rounded-2xl shadow-2xl p-4">
-                        <p className="w-full text-center mb-3 font-semibold text-lg">
-                            Độ mạnh AI
-                        </p>
-                        <div className="w-full flex justify-center">
-                            {DEPTH_OPTIONS.map((value, index) => (
-                                <button
-                                    onClick={() => setMaxDepth(value)}
-                                    key={index}
-                                    className={`px-6 py-2 bg-gray-800 text-lg font-medium cursor-pointer transition-all duration-200 ${maxDepth === value ? "bg-green-500" : "hover:bg-gray-700"} ${index === 0 ? "rounded-l-lg border-r border-gray-700" : index === DEPTH_OPTIONS.length - 1 ? "rounded-r-lg" : "border-r border-gray-700"}`}
-                                >
-                                    {value}
-                                </button>
-                            ))}
+
+                {/* Score Stats Summary Card */}
+                {(scores.p1 > 0 || scores.p2 > 0 || scores.ai > 0 || scores.draws > 0) && (
+                    <div className="w-full bg-slate-900/60 border border-slate-800 rounded-2xl p-3 mb-4 backdrop-blur-sm">
+                        <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                            <span className="flex items-center gap-1 font-semibold">
+                                <Trophy size={14} className="text-amber-400" />
+                                <span>Thành tích của bạn</span>
+                            </span>
+                            {scores.streak > 1 && (
+                                <span className="flex items-center gap-1 text-[11px] text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded-full">
+                                    <Flame size={12} className="text-amber-400" />
+                                    <span>Chuỗi {scores.streak} trận thắng!</span>
+                                </span>
+                            )}
                         </div>
-                        <p className="w-full text-center mb-3 mt-8 font-semibold text-lg">
-                            Chọn thứ tự chơi
-                        </p>
-                        <div className="w-full flex justify-center">
-                            <button
-                                onClick={() => setPlayerPiece(1)}
-                                className={`px-6 py-2 min-w-30 bg-gray-800 text-lg font-medium cursor-pointer transition-all duration-200 rounded-l-lg ${playerPiece === 1 ? "bg-red-500" : "hover:bg-gray-700"}`}
-                            >
-                                Đi trước
-                            </button>
-                            <button
-                                onClick={() => setPlayerPiece(2)}
-                                className={`px-6 py-2 min-w-30 bg-gray-800 text-lg font-medium cursor-pointer transition-all duration-200 rounded-r-lg ${playerPiece === 2 ? "bg-yellow-500" : "hover:bg-gray-700"}`}
-                            >
-                                Đi sau
-                            </button>
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div className="bg-slate-800/50 p-1.5 rounded-lg">
+                                <div className="text-slate-400 text-[10px]">Thắng AI</div>
+                                <div className="text-emerald-400 font-bold text-sm">{scores.p1}</div>
+                            </div>
+                            <div className="bg-slate-800/50 p-1.5 rounded-lg">
+                                <div className="text-slate-400 text-[10px]">Thua AI</div>
+                                <div className="text-rose-400 font-bold text-sm">{scores.ai}</div>
+                            </div>
+                            <div className="bg-slate-800/50 p-1.5 rounded-lg">
+                                <div className="text-slate-400 text-[10px]">Tỉ lệ thắng</div>
+                                <div className="text-cyan-400 font-bold text-sm">{aiWinRate}%</div>
+                            </div>
                         </div>
                     </div>
                 )}
-                <div className="flex justify-center mt-8">
-                    <button
-                        onClick={() => navigate("/game")}
-                        className="px-12 py-4 bg-green-500 rounded-lg font-semibold text-2xl cursor-pointer shadow-2xl hover:bg-green-400 transition-colors duration-200"
-                    >
-                        Bắt đầu
-                    </button>
-                    <button
-                        onClick={() => setHowToPlay(true)}
-                        className="p-4 ml-2 bg-gray-600 rounded-lg cursor-pointer shadow-2xl hover:bg-gray-500 transition-colors duration-200"
-                    >
-                        <CircleQuestionMark size={30} />
-                    </button>
-                </div>
+
+                {/* Start Game Button */}
+                <button
+                    onClick={handleStartGame}
+                    className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-white font-black text-lg sm:text-xl shadow-[0_10px_25px_rgba(16,185,129,0.35)] flex items-center justify-center gap-3 cursor-pointer transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-98"
+                >
+                    <Play size={24} fill="currentColor" />
+                    <span>Bắt Đầu Ván Đấu</span>
+                </button>
             </div>
+
+            {/* How to Play Modal */}
+            <HowToPlayModal
+                isOpen={isHowToPlayOpen}
+                onClose={() => setIsHowToPlayOpen(false)}
+            />
         </div>
     );
 };

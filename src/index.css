@@ -1,6 +1,126 @@
 @import "tailwindcss";
 @plugin "tailwind-scrollbar";
 
+:root {
+    --color-p1: #ef4444;
+    --color-p1-light: #f87171;
+    --color-p1-glow: rgba(239, 68, 68, 0.6);
+    --color-p2: #eab308;
+    --color-p2-light: #fde047;
+    --color-p2-glow: rgba(234, 179, 8, 0.6);
+}
+
 body {
-    font-family: "Roboto", sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #020617;
+    color: #f8fafc;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Connect 4 Chip Drop Animation with physics easing */
+@keyframes chipDropAnim {
+    0% {
+        transform: translateY(var(--drop-offset, -500%)) scaleY(1.1);
+        opacity: 0.6;
+    }
+    70% {
+        transform: translateY(0) scaleY(0.88) scaleX(1.12);
+        opacity: 1;
+    }
+    85% {
+        transform: translateY(-10%) scaleY(1.03) scaleX(0.97);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-chip-drop {
+    animation: chipDropAnim var(--drop-duration, 0.4s) cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
+    will-change: transform, opacity;
+}
+
+/* 4-in-a-row Winning Glowing Pulse */
+@keyframes winningGlow {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 16px 5px rgba(250, 204, 21, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 28px 10px rgba(250, 204, 21, 1), inset 0 0 15px rgba(255, 255, 255, 1);
+    }
+}
+
+.animate-winning-chip {
+    animation: winningGlow 1.4s ease-in-out infinite;
+    z-index: 20;
+    position: relative;
+}
+
+/* Pulsing Turn Indicator */
+@keyframes activeTurnPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 var(--pulse-color, rgba(239, 68, 68, 0.7));
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+}
+
+.animate-active-turn {
+    animation: activeTurnPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Ghost Preview Chip */
+@keyframes ghostPulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(0.94);
+    }
+    50% {
+        opacity: 0.75;
+        transform: scale(1);
+    }
+}
+
+.animate-ghost {
+    animation: ghostPulse 1.2s ease-in-out infinite;
+}
+
+/* Connect 4 3D Chip Styling */
+.chip-3d-red {
+    background: radial-gradient(circle at 35% 35%, #fca5a5 0%, #ef4444 45%, #b91c1c 85%, #7f1d1d 100%);
+    box-shadow: 
+        inset 0 3px 6px rgba(255, 255, 255, 0.5),
+        inset 0 -4px 6px rgba(0, 0, 0, 0.5),
+        0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.chip-3d-yellow {
+    background: radial-gradient(circle at 35% 35%, #fef08a 0%, #eab308 45%, #ca8a04 85%, #854d0e 100%);
+    box-shadow: 
+        inset 0 3px 6px rgba(255, 255, 255, 0.6),
+        inset 0 -4px 6px rgba(0, 0, 0, 0.45),
+        0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.slot-empty {
+    background: radial-gradient(circle at 50% 50%, #0b1324 0%, #030712 100%);
+    box-shadow: 
+        inset 0 4px 8px rgba(0, 0, 0, 0.8),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.08);
+}
+
+/* Board Outer 3D Shell */
+.board-shell {
+    background: linear-gradient(145deg, #1e3a8a, #172554);
+    box-shadow: 
+        0 20px 40px -10px rgba(0, 0, 0, 0.7),
+        0 0 25px rgba(30, 58, 138, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -4px 6px rgba(0, 0, 0, 0.6);
 }
